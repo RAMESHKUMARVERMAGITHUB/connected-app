@@ -15,7 +15,7 @@ pipeline{
         }
         stage('Checkout from Git'){
             steps{
-                git branch: 'main', url: 'https://github.com/rameshkumarvermagithub/connected-app.git'
+                git branch: 'master', url: 'https://github.com/rameshkumarvermagithub/connected-app.git'
             }
         }
         stage("Sonarqube Analysis "){
