@@ -15,14 +15,14 @@ pipeline{
         }
         stage('Checkout from Git'){
             steps{
-                git branch: 'main', url: 'https://github.com/rameshkumarvermagithub/python-calculator.git'
+                git branch: 'main', url: 'https://github.com/rameshkumarvermagithub/connected-app.git'
             }
         }
         stage("Sonarqube Analysis "){
             steps{
                 withSonarQubeEnv('sonar-server') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=python-calculator \
-                    -Dsonar.projectKey=python-calculator'''
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=connected-app \
+                    -Dsonar.projectKey=connected-app'''
                 }
             }
         }
@@ -53,44 +53,44 @@ pipeline{
             steps{
                 script{
                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){
-                       sh "docker build -t python-calculator ."
-                       sh "docker tag python-calculator rameshkumarverma/python-calculator:latest"
-                       sh "docker push rameshkumarverma/python-calculator:latest"
+                       sh "docker build -t connected-app ."
+                       sh "docker tag connected-app rameshkumarverma/connected-app:latest"
+                       sh "docker push rameshkumarverma/connected-app:latest"
                     }
                 }
             }
         }
         stage("TRIVY"){
             steps{
-                sh "trivy image rameshkumarverma/python-calculator:latest > trivyimage.txt"
+                sh "trivy image rameshkumarverma/connected-app:latest > trivyimage.txt"
             }
         }
-        // stage("deploy_docker"){
-        //     steps{
-        //         sh "docker stop python-calculator || true"  // Stop the container if it's running, ignore errors
-        //         sh "docker rm python-calculator || true" 
-        //         sh "docker run -d --name python-calculator -p 5000:5000 rameshkumarverma/python-calculator:latest"
-        //     }
-        // }
-      stage('Deploy to Kubernetes') {
-            steps {
-                script {
-                    // dir('K8S') {
-                        withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'k8s', namespace: '', restrictKubeConfigAccess: false, serverUrl: '') {
-                            // Apply deployment and service YAML files
-                            sh 'kubectl apply -f deployment.yml'
-                            sh 'kubectl apply -f service.yml'
-
-                            // Get the external IP or hostname of the service
-                            // def externalIP = sh(script: 'kubectl get svc amazon-service -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"', returnStdout: true).trim()
-
-                            // Print the URL in the Jenkins build log
-                            // echo "Service URL: http://${externalIP}/"
-                        }
-                    // }
-                }
+        stage("deploy_docker"){
+            steps{
+                sh "docker stop connected-app || true"  // Stop the container if it's running, ignore errors
+                sh "docker rm connected-app || true" 
+                sh "docker run -d --name connected-app -p 5000:5000 rameshkumarverma/connected-app:latest"
             }
         }
+      // stage('Deploy to Kubernetes') {
+      //       steps {
+      //           script {
+      //               // dir('K8S') {
+      //                   withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'k8s', namespace: '', restrictKubeConfigAccess: false, serverUrl: '') {
+      //                       // Apply deployment and service YAML files
+      //                       sh 'kubectl apply -f deployment.yml'
+      //                       sh 'kubectl apply -f service.yml'
+
+      //                       // Get the external IP or hostname of the service
+      //                       // def externalIP = sh(script: 'kubectl get svc amazon-service -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"', returnStdout: true).trim()
+
+      //                       // Print the URL in the Jenkins build log
+      //                       // echo "Service URL: http://${externalIP}/"
+      //                   }
+      //               // }
+      //           }
+      //       }
+      //   }
 
     }
 }
